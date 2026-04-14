@@ -1,0 +1,30 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "baseUrl": ".",
+    "paths": {
+      "@ui/*":          ["tests/ui/*"],
+      "@actors/*":      ["tests/actors/*"],
+      "@tasks/*":       ["tests/tasks/*"],
+      "@flows/*":       ["tests/flows/*"],
+      "@strategies/*":  ["tests/strategies/*"],
+      "@api/*":         ["tests/api/*"],
+      "@factories/*":   ["tests/factories/*"],
+      "@assertions/*":  ["tests/assertions/*"],
+      "@data/*":        ["tests/data/*"],
+      "@constants/*":   ["tests/constants/*"],
+      "@fixtures/*":    ["tests/fixtures/*"],
+      "@utils/*":       ["tests/utils/*"]
+    },
+    "outDir": "dist",
+    "rootDir": "."
+  },
+  "include": ["**/*.ts"],
+  "exclude": ["node_modules", "dist"]
+}

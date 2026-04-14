@@ -1,0 +1,123 @@
+name: Regression Suite
+
+on:
+  schedule:
+    - cron: '0 20 * * 1-5'   # Weekdays 8PM SGT (UTC+8)
+  workflow_dispatch:
+    inputs:
+      env:
+        description: 'Environment (dev|prod)'
+        required: false
+        default: prod
+      grep:
+        description: 'Tag filter (e.g. @p1, @checkout)'
+        required: false
+        default: '@regression'
+      shard_total:
+        description: 'Total shards'
+        required: false
+        default: '4'
+
+concurrency:
+  group: regression-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  regression:
+    name: Regression [${{ matrix.shard }}/${{ inputs.shard_total || 4 }}] — ${{ matrix.region }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    strategy:
+      fail-fast: false
+      matrix:
+        region: [SG, VN]
+        shard: [1, 2, 3, 4]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install chromium --with-deps
+
+      - name: Run regression — ${{ matrix.region }} shard ${{ matrix.shard }}/${{ inputs.shard_total || 4 }}
+        env:
+          ENV: ${{ inputs.env || 'prod' }}
+          CI: true
+          WORKERS: 4
+          SKIP_CONNECTIVITY_CHECK: true
+          BUYER_VN_EMAIL: ${{ secrets.BUYER_VN_EMAIL }}
+          BUYER_VN_PASSWORD: ${{ secrets.BUYER_VN_PASSWORD }}
+          BUYER_SG_EMAIL: ${{ secrets.BUYER_SG_EMAIL }}
+          BUYER_SG_PASSWORD: ${{ secrets.BUYER_SG_PASSWORD }}
+        run: |
+          npx playwright test \
+            --project=${{ matrix.region }} \
+            --grep "${{ inputs.grep || '@regression' }}" \
+            --shard=${{ matrix.shard }}/${{ inputs.shard_total || 4 }} \
+            --reporter=json,html
+
+      - name: Upload shard report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: regression-${{ matrix.region }}-shard-${{ matrix.shard }}
+          path: |
+            playwright-report/
+            playwright-report/results.json
+          retention-days: 14
+
+  # Merge all shard reports into one
+  merge-reports:
+    name: Merge Reports
+    if: always()
+    needs: regression
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+
+      - name: Download all shard artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: all-reports/
+
+      - name: Merge HTML reports
+        run: npx playwright merge-reports --reporter html ./all-reports
+
+      - name: Upload merged report
+        uses: actions/upload-artifact@v4
+        with:
+          name: full-regression-report
+          path: playwright-report/
+          retention-days: 30
+
+      - name: Comment PR with test summary
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const results = JSON.parse(fs.readFileSync('all-reports/regression-SG-shard-1/results.json', 'utf8'));
+            const { stats } = results;
+            const body = `## Regression Test Results\n\n` +
+              `| Status | Count |\n|--------|-------|\n` +
+              `| ✅ Passed | ${stats.expected} |\n` +
+              `| ❌ Failed | ${stats.unexpected} |\n` +
+              `| ⏭️ Skipped | ${stats.skipped} |\n` +
+              `| ⏱️ Duration | ${Math.round(stats.duration / 1000)}s |`;
+            github.rest.issues.createComment({
+              ...context.repo, issue_number: context.issue.number, body
+            });

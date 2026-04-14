@@ -1,0 +1,10 @@
+node_modules/
+dist/
+playwright-report/
+test-results/
+.blob/
+.env
+.env.local
+*.log
+
+playwright/.auth/*.json

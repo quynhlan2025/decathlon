@@ -1,0 +1,37 @@
+{
+  "name": "decathlon-playwright-framework",
+  "version": "1.0.0",
+  "description": "Enterprise Playwright Automation Framework for Decathlon VN & SG",
+  "main": "index.js",
+  "scripts": {
+    "kill:report": "lsof -ti:9323 | xargs kill -9 2>/dev/null || true",
+    "test": "npm run kill:report && playwright test",
+    "test:dev": "npm run kill:report && ENV=dev playwright test",
+    "test:prod": "npm run kill:report && ENV=prod playwright test",
+    "test:vn": "npm run kill:report && playwright test --project=VN",
+    "test:sg": "npm run kill:report && playwright test --project=SG",
+    "test:vn:dev": "npm run kill:report && ENV=dev playwright test --project=VN",
+    "test:vn:prod": "npm run kill:report && ENV=prod playwright test --project=VN",
+    "test:sg:dev": "npm run kill:report && ENV=dev playwright test --project=SG",
+    "test:sg:prod": "npm run kill:report && ENV=prod playwright test --project=SG",
+    "test:headed": "npm run kill:report && playwright test --headed",
+    "test:debug": "playwright test --debug",
+    "report": "playwright show-report",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "keywords": [
+    "playwright",
+    "automation",
+    "decathlon",
+    "typescript"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@playwright/test": "^1.49.0",
+    "@types/node": "^22.10.0",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.0"
+  }
+}

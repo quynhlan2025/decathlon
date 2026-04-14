@@ -1,0 +1,26 @@
+# Decathlon Automation - Coding Standards (Hiến pháp)
+
+## OOP Principles
+- **Single Responsibility**: Mỗi class chỉ làm một việc rõ ràng
+- **Open/Closed**: Mở rộng qua kế thừa, không sửa class gốc
+- **Liskov Substitution**: Class con thay thế được class cha
+- **Dependency Injection**: Truyền dependencies (page, context) qua constructor
+- **Composition over Inheritance**: Ưu tiên compose components thay vì kế thừa sâu
+
+## Structure
+- **constants/**: Dữ liệu tĩnh (URLs, test data) - Data-driven
+- **utils/**: Browser manager, Actors (roles)
+- **pages/**: Page Object Model - logic trang
+- **pages/components/**: Reusable UI components
+- **tests/**: Kịch bản test - chỉ business logic
+
+## Naming
+- Pages: `*.page.ts`
+- Components: `*.component.ts`
+- Actors: `*.actor.ts`
+- Specs: `*.spec.ts`
+
+## Playwright
+- Dùng `getByRole`, `getByText`, `locator()` - tránh CSS phức tạp
+- Wrapper: `smartClick`, `handlePopups` cho flaky handling
+- Actors có Browser Context riêng cho mỗi vai trò (Buyer/Seller)

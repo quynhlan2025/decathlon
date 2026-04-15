@@ -54,6 +54,29 @@ export const REGIONAL_POPUPS: Record<'VN' | 'SG', PopupConfig[]> = {
       timeout: 2000,
     },
     {
+      name: 'product-promo-popup',       // popup upsell sản phẩm (VD: "Set 3 tất mang hàng ngày")
+      selector: [
+        // nút × góc trên phải của modal overlay
+        '.modal button[aria-label*="close" i]',
+        '.modal button[aria-label*="đóng" i]',
+        '.modal .btn-close',
+        '.modal [data-testid*="close"]',
+        '[class*="modal"] [class*="close"]',
+        '[class*="popup"] [class*="close"]',
+        '[class*="overlay"] [class*="close"]',
+        // Playwright text matcher cho ký tự ×
+        'button:has-text("×")',
+        'button:has-text("✕")',
+        // data attributes phổ biến
+        '[data-dismiss="modal"]',
+        '[data-testid="product-popup-close"]',
+        '[data-testid="upsell-popup-close"]',
+      ].join(', '),
+      trigger: 'campaign',
+      pages: ['/'],
+      timeout: 2000,
+    },
+    {
       name: 'newsletter-popup',
       selector: [
         '.newsletter-modal [aria-label="close"]',

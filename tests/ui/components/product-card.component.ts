@@ -87,8 +87,9 @@ export class ProductGridComponent extends BasePage {
     this.grid = page.locator(
       "[data-testid='product-grid'], [data-testid='productHit-tilesbox-container'], [class*='product-grid']"
     ).first();
-    this.cardLocators = this.grid.locator(
-      "[data-testid='productHit-tilesbox-gridcell'], [data-testid='product-card'], [class*='product-card']"
+    // [data-testid="producthit-tile-box"] là locator chính xác từ Decathlon SG/VN
+    this.cardLocators = page.locator(
+      "[data-testid='producthit-tile-box'], [data-testid='productHit-tilesbox-gridcell'], [data-testid='product-card']"
     );
   }
 
@@ -112,6 +113,19 @@ export class ProductGridComponent extends BasePage {
   async clickCard(index: number): Promise<void> {
     await this.getCard(index).click();
     await this.page.waitForLoadState('networkidle');
+  }
+
+  /**
+   * Lấy danh sách tất cả product tiles, click vào 1 card ngẫu nhiên.
+   * Trả về index đã click để test có thể log/assert nếu cần.
+   */
+  async clickRandom(): Promise<number> {
+    await this.cardLocators.first().waitFor({ state: 'visible', timeout: 10_000 });
+    const count = await this.getCount();
+    if (count === 0) throw new Error('No product tiles found on page');
+    const index = Math.floor(Math.random() * count);
+    await this.clickCard(index);
+    return index;
   }
 
   async isGridVisible(): Promise<boolean> {

@@ -73,4 +73,14 @@ export class SearchResultsPage extends BasePageObject {
   async getPaginationCount(): Promise<number> {
     return await this.paginationItems.count();
   }
+
+  /**
+   * Lấy danh sách [data-testid="producthit-tile-box"], click random 1 sản phẩm.
+   * Trả về URL của PDP sau khi click.
+   */
+  async clickRandomProduct(): Promise<string> {
+    await this.productGrid.clickRandom();
+    await this.page.waitForLoadState('networkidle');
+    return this.page.url();
+  }
 }

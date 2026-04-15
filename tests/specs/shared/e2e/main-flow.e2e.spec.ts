@@ -39,9 +39,11 @@ test.describe('Main Flow – Homepage to Purchase @regression @p1 @main-flow', (
     expect(name.length).toBeGreaterThan(0);
   });
 
-  test('TC-MAIN-005: product detail page displays price', async ({ pages, api }) => {
-    const product = await api.products.getRandomInStockProduct();
-    await pages.productDetail.goto(product.productUrl);
+  test('TC-MAIN-005: product detail page displays price', async ({ pages }) => {
+    // Homepage → Category → click random product tile → assert price on PDP
+    await pages.home.gotoCategory('RUNNING');
+    await pages.category.productGrid.clickRandom();
+    await pages.productDetail.page.waitForLoadState('networkidle');
     await expect(pages.productDetail.productPrice).toBeVisible();
     const price = await pages.productDetail.getPrice();
     expect(price.length).toBeGreaterThan(0);
